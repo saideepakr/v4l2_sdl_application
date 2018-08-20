@@ -1,43 +1,36 @@
-//#pragma once
-#include "header.h"
-//#include "main.h"
+#include "v4l2.h"
 #include "capture.h"
-extern void frame_handler(void *pframe, int length);
 
+/**
+Function Name : errno_exit
+Function Description : Displays error message
+Parameter : Error name charater pointer
+Return : void
+**/
 void errno_exit(const char *s)
 {
         fprintf(stderr, "%s error %d, %s\\n", s, errno, strerror(errno));
         exit(EXIT_FAILURE);
 }
 
-
+/**
+Function Name : process_image
+Function Description : Writes the image in the output file
+Parameter : Start address and size of the image
+Return : void
+**/
 void process_image(const void *buffer_start, int size)
 {
-        /*int file;
-        time_t rawtime;
-   		struct tm *info;
-   		
-		time( &rawtime );
-   		info = localtime( &rawtime );
-   		
-        char name_buf[100], suffix[10] = ".", width_height_time_str[50];
-        sprintf(width_height_time_str, "_%uX%u_%d_%d_%d_%d_%d_%d", width, height, 1900 + info->tm_year, info->tm_yday, info->tm_hour, info->tm_min, (int)info->tm_sec, (int)start_time.tv_usec/1000); 
-        
-        strcpy(name_buf, outfile);
-        strcat(name_buf, width_height_time_str);
-        strcat(suffix, pix_format_str);
-        strcat(name_buf, suffix);
-		if((file = open(name_buf, O_WRONLY | O_CREAT, 0660)) < 0)
-		{
-			perror("open");
-			exit(1);
-		}*/
 		write(file, buffer_start, size);
-		//close(file);
-
 }
 
-int read_frame()
+/**
+Function Name : read_frame
+Function Description : Read the frame and save or stream based on the command line inputs
+Parameter : void
+Return : int
+**/
+int read_frame(void)
 {
         struct v4l2_buffer buf;
         unsigned int i;
@@ -151,6 +144,12 @@ int read_frame()
         return 1;
 }
 
+/**
+Function Name : mainloop
+Function Description : Main loop for capturing images by calling read_frame function and printing frames per second (fps)
+Parameter : void
+Return : void
+**/
 void mainloop(void)
 {
     time_t rawtime;
@@ -178,9 +177,6 @@ void mainloop(void)
 	}
 	
     unsigned int count;
-    struct v4l2_streamparm sparm;
-    sparm.type = type;
-    sparm.parm.capture.capability |= V4L2_CAP_TIMEPERFRAME;
     
     count = frame_count;
 	
@@ -191,10 +187,7 @@ void mainloop(void)
 	
     	read_frame();
     	
-    	if (-1 == ioctl(fd, VIDIOC_G_PARM, &sparm))
-        	errno_exit("VIDIOC_G_PARM");
-     
-        //printf("\r%d \t\t\t%.2fms \t%.2ffps", count, (sparm.parm.capture.timeperframe.numerator*1.0)/(sparm.parm.capture.timeperframe.denominator) * 1000, (sparm.parm.capture.timeperframe.denominator)/(sparm.parm.capture.timeperframe.numerator*1.0));
+    	
         fflush(stdout);
 		
 		gettimeofday(&end_time, NULL);
@@ -211,6 +204,12 @@ void mainloop(void)
 	close(file);
 }
 
+/**
+Function Name : stop_capturing
+Function Description : Function to stream off the camera
+Parameter : void
+Return : void
+**/
 void stop_capturing(void)
 {
         enum v4l2_buf_type type;
@@ -229,6 +228,12 @@ void stop_capturing(void)
         }
 }
 
+/**
+Function Name : start_capturing
+Function Description : Function to queue the buffers and stream on the camera
+Parameter : void
+Return : void
+**/
 void start_capturing(void)
 {
         unsigned int i;
@@ -277,6 +282,12 @@ void start_capturing(void)
         }
 }
 
+/**
+Function Name : uninit_device
+Function Description : Function to uninitialize the memory
+Parameter : void
+Return : void
+**/
 void uninit_device(void)
 {
         unsigned int i;
@@ -301,6 +312,12 @@ void uninit_device(void)
         free(buffers);
 }
 
+/**
+Function Name : init_read
+Function Description : Function to initialize the memory for io read method
+Parameter : size of the image
+Return : void
+**/
 void init_read(unsigned int buffer_size)
 {
         buffers = calloc(1, sizeof(*buffers));
@@ -319,6 +336,12 @@ void init_read(unsigned int buffer_size)
         }
 }
 
+/**
+Function Name : init_read
+Function Description : Function to initialize the memory for io mmap method
+Parameter : void
+Return : void
+**/
 void init_mmap(void)
 {
         struct v4l2_requestbuffers req;
@@ -377,6 +400,12 @@ void init_mmap(void)
         }
 }
 
+/**
+Function Name : init_userp
+Function Description : Function to initialize the memory for io user pointer method
+Parameter : size of the image
+Return : void
+**/
 void init_userp(unsigned int buffer_size)
 {
         struct v4l2_requestbuffers req;
@@ -415,6 +444,12 @@ void init_userp(unsigned int buffer_size)
         }
 }
 
+/**
+Function Name : init_device
+Function Description : Function to query the video capture amd io methods capabilities
+Parameter : size of the image
+Return : void
+**/
 void init_device(void)
 {
         struct v4l2_capability cap;
@@ -502,7 +537,13 @@ void init_device(void)
         }
                                       
 }    
-        
+
+/**
+Function Name : openDevice
+Function Description : Function to open the device from the specified path
+Parameter : device path character pointer
+Return : void
+**/        
 void openDevice(char* dev_path)
 {
 	if((fd = open(dev_path, O_RDWR)) < 0){
@@ -511,8 +552,16 @@ void openDevice(char* dev_path)
     }
 }
 
+/**
+Function Name : close_device
+Function Description : Function to close the device
+Parameter : void
+Return : void
+**/
 void close_device(void)
 {
+	if(fd == -1)
+		return;
         if (-1 == close(fd))
                 errno_exit("close");
 

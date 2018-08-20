@@ -1,10 +1,14 @@
-//#pragma once
-#include "header.h"
-//#include "main.h"
+#include "v4l2.h"
 #include "v4l2_ctrl.h"
 #include "capture.h"
 
-void deviceInfo()
+/**
+Function Name : deviceInfo
+Function Description : Displays the information about the device
+Parameter : void
+Return : void
+**/
+void deviceInfo(void)
 {
 	struct v4l2_capability cap;
 	int index;
@@ -44,6 +48,12 @@ void deviceInfo()
      }
 }
 
+/**
+Function Name : bufferTypeToString
+Function Description : Displays the information about the device
+Parameter : unsigned integer type of V4L2 Capabilities
+Return : void
+**/
 void bufferTypeToString(unsigned int ui_type)
 {
 	if(ui_type == V4L2_CAP_VIDEO_CAPTURE)
@@ -52,11 +62,23 @@ void bufferTypeToString(unsigned int ui_type)
 		printf("Video Output");
 }
 
+/**
+Function Name : fcc2s
+Function Description : Prints the pixel format
+Parameter : unsigned integer pixel format
+Return : void
+**/
 void fcc2s(unsigned int ui_pixel_format)
 {
 	printf("'%c%c%c%c'",(ui_pixel_format & 0xff), ((ui_pixel_format >> 8) & 0xff), ((ui_pixel_format >> 16) & 0xff), ((ui_pixel_format >> 24) & 0xff));
 }
 
+/**
+Function Name : frmtype2s
+Function Description : Uses unsigned integer type and returns the frame type string
+Parameter : unsigned integer type
+Return : static constant character pointer
+**/
 static const char* frmtype2s(unsigned type)
 {
 	static const char *types[] = {
@@ -71,6 +93,12 @@ static const char* frmtype2s(unsigned type)
 	return types[type];
 }
 
+/**
+Function Name : print_frmsize
+Function Description : Prints the frame size
+Parameter : v4l2_frmsizeenum structure and prefix
+Return : void
+**/
 void print_frmsize(const struct v4l2_frmsizeenum frmsize, const char *prefix)
 {
 	printf("%s\tSize: %s ", prefix, frmtype2s(frmsize.type));
@@ -91,16 +119,34 @@ void print_frmsize(const struct v4l2_frmsizeenum frmsize, const char *prefix)
 	printf("\n");
 }
 
+/**
+Function Name : fract2sec
+Function Description : Converts fractions to seconds and Prints the seconds
+Parameter : v4l2_fract structure
+Return : void
+**/
 void fract2sec(const struct v4l2_fract f)
 {
 	printf("%.3fs ", (1.0 * f.numerator) / f.denominator);
 }
 
+/**
+Function Name : fract2fps
+Function Description : Converts fractions to frames per second and Prints the frames per second
+Parameter : v4l2_fract structure
+Return : void
+**/
 void fract2fps(const struct v4l2_fract f)
 {
 	printf("(%.3f fps)", (1.0 * f.denominator) / f.numerator);
 }
 
+/**
+Function Name : print_frmival
+Function Description : Prints the Frame intervals
+Parameter : v4l2_frmivalenum structure and prefix
+Return : void
+**/
 void print_frmival(const struct v4l2_frmivalenum frmival, const char *prefix)
 {
 	printf("%s\tInterval: %s ", prefix, frmtype2s(frmival.type));
@@ -119,15 +165,21 @@ void print_frmival(const struct v4l2_frmivalenum frmival, const char *prefix)
 	}
 	else if (frmival.type == V4L2_FRMIVAL_TYPE_STEPWISE) 
 	{
-				fract2sec(frmival.stepwise.min);	printf("- ");
-				fract2sec(frmival.stepwise.max);	printf(" with step ");
-				fract2sec(frmival.stepwise.step);	printf(" (");
-				fract2fps(frmival.stepwise.max);
-				fract2fps(frmival.stepwise.min);	printf(")\n");
+		fract2sec(frmival.stepwise.min);	printf("- ");
+		fract2sec(frmival.stepwise.max);	printf(" with step ");
+		fract2sec(frmival.stepwise.step);	printf(" (");
+		fract2fps(frmival.stepwise.max);
+		fract2fps(frmival.stepwise.min);	printf(")\n");
 	}
 }
 
-int listFormats()
+/**
+Function Name : listFormats
+Function Description : Prints the available formats
+Parameter : void
+Return : int
+**/
+int listFormats(void)
 {
 
 	struct v4l2_capability cap;
@@ -195,6 +247,12 @@ int listFormats()
 	
 }
 
+/**
+Function Name : enumerateMenu
+Function Description : Enumerates and Prints the available menus in the control
+Parameter : v4l2_queryctrl structure
+Return : void
+**/
 void enumerateMenu(struct v4l2_queryctrl queryctrl)
 {
 	struct v4l2_querymenu querymenu;
@@ -213,7 +271,13 @@ void enumerateMenu(struct v4l2_queryctrl queryctrl)
     }
 }
 
-void listControls()
+/**
+Function Name : listControls
+Function Description : Prints the available controls
+Parameter : void
+Return : void
+**/
+void listControls(void)
 {
 	struct v4l2_queryctrl queryctrl;
 	struct v4l2_control control;

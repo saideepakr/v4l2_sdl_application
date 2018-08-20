@@ -1,5 +1,11 @@
 #include "stream.h"
 
+/**
+Function Name : v4l2_streaming
+Function Description : Create surface, renderer, texture and infinitly read the frame till exit
+Parameter : void
+Return : void
+**/
 void *v4l2_streaming() {
 	// SDL2 begins
 	CLEAR(sdlRect);
@@ -49,6 +55,12 @@ void *v4l2_streaming() {
 	
 }
 
+/**
+Function Name : frame_handler
+Function Description : Create surface, renderer, texture and infinitly read the frame till exit
+Parameter : Start address and length of the frame
+Return : void
+**/
 void frame_handler(void *pframe, int length) 
 {
 	SDL_UpdateTexture(sdlTexture, &sdlRect, pframe, width * 2);
@@ -58,7 +70,12 @@ void frame_handler(void *pframe, int length)
 	SDL_RenderPresent(sdlRenderer);
 }
 
-
+/**
+Function Name : mainstreamloop
+Function Description : Main loop to create pthread and stream the frame
+Parameter : void
+Return : void
+**/
 void mainstreamloop()
 {
 	if (pthread_create(&thread_stream, NULL, v4l2_streaming, NULL))
